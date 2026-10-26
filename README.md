@@ -5,8 +5,8 @@ A GitHub Action (`.github/workflows/prices.yml`) downloads them every night from
 
 | File | ETF | ISIN |
 |---|---|---|
-| `data/world_islamic_usd.csv` | iShares MSCI World Islamic UCITS ETF (London, USD) | IE00B27YCN58 |
-| `data/usa_islamic_usd.csv` | iShares MSCI USA Islamic UCITS ETF (London, USD) | IE00B296QM64 |
-| `data/em_islamic_usd.csv` | iShares MSCI Emerging Markets Islamic UCITS ETF (London, USD) | IE00B27YCP72 |
+| `data/world_islamic_usd.csv` | iShares MSCI World Islamic UCITS ETF (London ISDW, USD) | IE00B27YCN58 |
+| `data/usa_islamic_usd.csv` | iShares MSCI USA Islamic UCITS ETF (London ISDU, USD) | IE00B296QM64 |
+| `data/em_islamic_usd.csv` | iShares MSCI Emerging Markets Islamic UCITS ETF (London ISDE, USD) | IE00B27YCP72 |
 
-Columns: `date, close, adj_close, clean, usd, volume`. `adj_close` includes dividends; `clean` is `adj_close` with Yahoo's pence/cent mix-ups repaired; `usd` is `clean` in US dollars (use this one). `data/gbpusd.csv` holds the exchange rate used for the repair. Prices only, for personal research. Not investment advice.
+Columns: `date, close, adj_close, clean, usd, volume`. `adj_close` includes dividends; `clean` is `adj_close` with Yahoo's unit mix-ups repaired; `usd` is `clean` in US dollars (use this one). `data/gbpusd.csv` holds the exchange rate used for the repair. Prices only, for personal research. Not investment advice.

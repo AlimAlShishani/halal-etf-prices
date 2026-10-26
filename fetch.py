@@ -1,16 +1,16 @@
 """Downloads daily prices for the halal ETFs used by the paper-trading bot page.
 Runs every night on GitHub Actions and writes one CSV per listing to data/.
 Columns: date, close (as quoted), adj_close (dividends reinvested), clean, usd, volume.
-`clean` is adj_close with Yahoo's unit mix-ups repaired: some London days are quoted in
-US cents instead of pence (or the reverse), which looks like a fake +-40% jump. Each day is
-converted with that day's GBP/USD rate to whichever unit sits closest to its neighbour.
+`clean` is adj_close with Yahoo's unit mix-ups repaired: London quotes sometimes switch between
+dollars, cents and pence for a day or a few weeks, which looks like a fake jump. A day that jumps
+more than 15% is converted (x/÷100 and/or GBP/USD) if that lands it within 8% of its neighbour.
 `usd` is `clean` in US dollars (pence lines times GBP/USD / 100), the column the bot uses."""
 import os, sys, math, datetime as dt
 import pandas as pd, yfinance as yf
 
 LISTINGS = {  # Yahoo ticker: (file name, unit most days are quoted in)
-    'ISWD.L': ('world_islamic_usd', 'GBp'),   # iShares MSCI World Islamic UCITS ETF, IE00B27YCN58
-    'ISUS.L': ('usa_islamic_usd', 'GBp'),     # iShares MSCI USA Islamic UCITS ETF, IE00B296QM64
+    'ISDW.L': ('world_islamic_usd', 'USD'),   # iShares MSCI World Islamic UCITS ETF, IE00B27YCN58 (USD line)
+    'ISDU.L': ('usa_islamic_usd', 'USD'),     # iShares MSCI USA Islamic UCITS ETF, IE00B296QM64 (USD line)
     'ISDE.L': ('em_islamic_usd', 'USD'),      # iShares MSCI Emerging Markets Islamic UCITS ETF, IE00B27YCP72
 }
 TODAY = dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d')
@@ -26,7 +26,7 @@ def daily(ticker, adjust_cols=True):
 JUMP, NEAR = 0.15, 0.08   # a day is repaired only if it jumps >15% and a converted value lands within 8%
 def pick(c, f, ref):
     if abs(math.log(c / ref)) <= JUMP: return c
-    alt = min([c / f, c * f], key=lambda x: abs(math.log(x / ref)))
+    alt = min([c / f, c * f, c / 100, c * 100, c / f / 100, c * f / 100, c / f * 100, c * f * 100], key=lambda x: abs(math.log(x / ref)))
     return alt if abs(math.log(alt / ref)) < NEAR else c
 def repair(adj, fx):
     """Walk back from the newest day, comparing each day with the (already repaired) day after it."""
