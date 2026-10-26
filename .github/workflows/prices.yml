@@ -1,0 +1,24 @@
+name: Download ETF prices
+on:
+  schedule:
+    - cron: '45 0 * * 2-6'   # 00:45 UTC Tuesday-Saturday, after each London trading day
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet yfinance pandas
+      - run: python fetch.py
+      - name: Commit new prices
+        run: |
+          git config user.name "etf-price-bot"
+          git config user.email "etf-price-bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "Prices $(date -u +%F)"
+          git push
